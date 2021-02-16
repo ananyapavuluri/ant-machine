@@ -5,9 +5,9 @@ import numpy as np
 from skimage.metrics import structural_similarity as ssim
 
 # Read BGR image
-img = cv2.imread('ants_no_blob.jpg')
+img = cv2.imread('ants_no_blob.jpeg')
 original = img.copy()
-background = cv2.imread('ants_background.jpg')
+background = cv2.imread('ants_background.jpeg')
 # Converting color from BGR to RGB
 # no_bk = cv2.subtract(img, background)
 # cv2.imwrite('sub.jpg', no_bk)
@@ -49,12 +49,12 @@ no_bk = cv2.dilate(no_bk, kernel_4, iterations=2)
 
 cv2.imwrite('no_noise.jpg', no_bk)
 
-edged = cv2.Canny(no_bk, 230, 250)
+# edged = cv2.Canny(no_bk, 230, 250)
 
-cv2.imwrite('edged.jpg', edged)
+# cv2.imwrite('edged.jpg', edged)
 
 ROI_number = 0
-contours, hierarchy = cv2.findContours(edged,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+contours, hierarchy = cv2.findContours(no_bk,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 print('Number of contours: ' + str(len(contours)))
 for c in contours:
     # Obtain bounding rectangle to get measurements
@@ -62,8 +62,13 @@ for c in contours:
 
     # Find centroid
     M = cv2.moments(c)
-    cX = int(M["m10"] / M["m00"])
-    cY = int(M["m01"] / M["m00"])
+
+    if M["m00"] != 0:
+        cX = int(M["m10"] / M["m00"])
+        cY = int(M["m01"] / M["m00"])
+    else:
+        # set values as what you need in the situation
+        cX, cY = 0, 0
 
     # Crop and save ROI
     ROI = original[y:y+h, x:x+w]
